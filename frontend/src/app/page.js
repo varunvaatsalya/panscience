@@ -1,7 +1,7 @@
 "use client";
 import { useUserAuth } from "@/contexts/UserAuthContext";
 import Spinner from "@/components/shared/Spinner";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 function Page() {
