@@ -11,24 +11,52 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { showError } from "@/utils/toast";
 
 export default function UsersTable() {
-  const users = [
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john@example.com",
-      role: "user",
-      taskCount: 5,
-    },
-    {
-      id: "2",
-      name: "Alice Smith",
-      email: "alice@example.com",
-      role: "user",
-      taskCount: 3,
-    },
-  ];
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  // const users = [
+  //   {
+  //     id: "1",
+  //     name: "John Doe",
+  //     email: "john@example.com",
+  //     role: "user",
+  //     taskCount: 5,
+  //   },
+  //   {
+  //     id: "2",
+  //     name: "Alice Smith",
+  //     email: "alice@example.com",
+  //     role: "user",
+  //     taskCount: 3,
+  //   },
+  // ];
+
+  useEffect(() => {
+    async function fetchUsers() {
+      setIsLoading(true);
+      try {
+        let res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/users?limit=4&taskCount=1`,
+          {
+            credentials: "include",
+          }
+        );
+        res = await res.json();
+        if (res.success) {
+          setUsers(res.users);
+        } else showError("Error While fetching User list");
+      } catch (error) {
+        console.log(error);
+        showError("Error While fetching User list on client side");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchUsers();
+  }, []);
 
   return (
     <Card className="gap-4">
@@ -49,25 +77,39 @@ export default function UsersTable() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Total Tasks</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              <TableHead>Pending</TableHead>
+              <TableHead className="text-right">Total Tasks</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.role}</TableCell>
-                <TableCell>{user.taskCount}</TableCell>
-                <TableCell className="text-right">
-                  <Button size="sm" variant="outline">
-                    View Tasks
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {isLoading
+              ? Array.from({ length: 3 }).map((_, index) => (
+                  <TableRow key={index} className="animate-pulse">
+                    <TableCell colSpan={4}>
+                      <div className="h-6 bg-muted-foreground/20 rounded w-full" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              : users.map((user) => (
+                  <TableRow key={user._id}>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell className="flex items-center">
+                      <span
+                        className={
+                          user.pendingCount > 0
+                            ? "text-white bg-red-600 p-2 rounded text-center w-8 py-0.5 font-semibold"
+                            : ""
+                        }
+                      >
+                        {user.pendingCount}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {user.taskCount}
+                    </TableCell>
+                  </TableRow>
+                ))}
           </TableBody>
         </Table>
       </CardContent>

@@ -21,11 +21,13 @@ import Link from "next/link";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { showError, showSuccess } from "@/utils/toast";
 import { useParams, useRouter } from "next/navigation";
+import { useUserAuth } from "@/contexts/UserAuthContext";
 const ClientSelect = dynamic(() => import("react-select"), { ssr: false });
 
 function Page() {
   const router = useRouter();
   const params = useParams();
+  const { user } = useUserAuth();
   let taskId = params?.id;
   const [date, setDate] = useState(null);
   const [title, setTitle] = useState("");
@@ -82,7 +84,7 @@ function Page() {
         }
       }
     }
-    fetchUsers();
+    if (user?.role === "admin") fetchUsers();
     fetchTaskDeatils();
   }, []);
 
@@ -96,7 +98,7 @@ function Page() {
       showError("Please select a due date.");
       return;
     }
-    if (selectedUsers.length === 0) {
+    if (user.role === "admin" && selectedUsers.length === 0) {
       showError("Please assign the task to at least one user.");
       return;
     }
@@ -112,10 +114,10 @@ function Page() {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/tasks${
-          taskId ? `/${taskId}` : ""
+          taskId !== "new" ? `/${taskId}` : ""
         }`,
         {
-          method: taskId ? "PUT" : "POST",
+          method: taskId !== "new" ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
           credentials: "include",
@@ -123,14 +125,14 @@ function Page() {
       );
       const data = await res.json();
       if (data.success) {
-        showSuccess(res.message);
+        showSuccess(data.message);
         setTitle("");
         setDescription("");
         setDate(null);
         setPriority("medium");
         setSelectedUsers([]);
         setUploadedFiles([]);
-        if (taskId) router.back();
+        if (taskId !== "new") router.back();
       } else {
         showError(data.message || "Task creation failed.");
       }
@@ -214,18 +216,20 @@ function Page() {
                 </select>
               </div>
             </div>
-            <div className="space-y-1">
-              <Label>Assign To</Label>
-              <ClientSelect
-                isMulti
-                options={options}
-                value={selectedUsers}
-                onChange={setSelectedUsers}
-                className="text-black"
-                placeholder="Search and select users..."
-                menuPosition="fixed"
-              />
-            </div>
+            {user?.role === "admin" && (
+              <div className="space-y-1">
+                <Label>Assign To</Label>
+                <ClientSelect
+                  isMulti
+                  options={options}
+                  value={selectedUsers}
+                  onChange={setSelectedUsers}
+                  className="text-black"
+                  placeholder="Search and select users..."
+                  menuPosition="fixed"
+                />
+              </div>
+            )}
             <div className="space-y-1">
               <Label>Upload Documents (Max 3)</Label>
               <ul className="text-sm m-2 space-y-1 flex flex-col">
@@ -248,6 +252,9 @@ function Page() {
                     setUploadedFiles((prev) => [...prev, result]);
                     showSuccess("uploaded");
                   }}
+                  // onError={() =>
+                  //   showError("Failed to load Cloudinary. Check internet.")
+                  // }
                   disabled={uploadedFiles.length >= 3}
                 />
               )}
@@ -266,10 +273,10 @@ function Page() {
             </Button>
             <Button type="submit" className="flex-1" disabled={creating}>
               {creating
-                ? taskId
+                ? taskId !== "new"
                   ? "Updating..."
                   : "Creating..."
-                : taskId
+                : taskId !== "new"
                 ? "Update Task"
                 : "Create Task"}
             </Button>
@@ -285,8 +292,8 @@ export default Page;
 function CloudinaryUploader({ onUpload, disabled }) {
   return (
     <CldUploadWidget
-      uploadPreset="coupons"
-      options={{ maxFiles: 3, multiple: true }}
+      uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+      options={{ maxFiles: 1, multiple: false }}
       onSuccess={(result) => {
         if (result.event === "success") {
           const { secure_url, public_id, original_filename } = result.info;
@@ -309,19 +316,3 @@ function CloudinaryUploader({ onUpload, disabled }) {
   );
 }
 
-<CldUploadWidget
-  uploadPreset="coupons"
-  options={{ maxFiles: 1 }}
-  onSuccess={(result) => {
-    if (result.event === "success") {
-      const { secure_url, public_id } = result.info;
-      handleUpload({ secure_url, public_id });
-    }
-  }}
->
-  {({ open }) => (
-    <Button type="button" variant="outline" onClick={() => open()}>
-      Upload File
-    </Button>
-  )}
-</CldUploadWidget>;

@@ -1,11 +1,24 @@
 const Task = require("../models/task.model");
+const User = require("../models/user.model");
 const { deleteFile } = require("../utils/cloudinary");
 const mongoose = require("mongoose");
 
 exports.createTask = async (req, res) => {
   try {
-    const { title, description, dueDate, priority, assignedTo, documents } =
+    let { title, description, dueDate, priority, assignedTo, documents } =
       req.body;
+
+    if (assignedTo.length === 0) {
+      if (req.user.role === "admin")
+        res.status(400).json({
+          success: false,
+          message: "Assign this task atleast one user.",
+          task,
+        });
+      else {
+        assignedTo = [req.user.id];
+      }
+    }
 
     const task = await Task.create({
       title,
@@ -14,8 +27,8 @@ exports.createTask = async (req, res) => {
       priority,
       assignedTo,
       documents,
-      createdBy: req.user.id,
       createdRole: req.user.role,
+      createdBy: req.user.role === "admin" ? null : req.user.id,
     });
 
     res
@@ -27,6 +40,31 @@ exports.createTask = async (req, res) => {
   }
 };
 
+exports.getStats = async (req, res) => {
+  try {
+    const [totalUsers, totalTasks, pendingTasks, completedTasks] =
+      await Promise.all([
+        User.countDocuments(),
+        Task.countDocuments(),
+        Task.countDocuments({ status: "pending" }),
+        Task.countDocuments({ status: "completed" }),
+      ]);
+
+    res.json({
+      success: true,
+      stats: {
+        totalUsers,
+        totalTasks,
+        pendingTasks,
+        completedTasks,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 exports.getAllTasks = async (req, res) => {
   try {
     const {
@@ -34,10 +72,11 @@ exports.getAllTasks = async (req, res) => {
       status = "",
       priority = "",
       dueDateOrder = "asc",
+      limit = 10,
     } = req.query;
 
-    const limit = 10;
-    const skip = (Number(page) - 1) * limit;
+    // const limit = 10;
+    const skip = (Number(page) - 1) * Number(limit);
 
     const filter = {};
 
@@ -55,12 +94,12 @@ exports.getAllTasks = async (req, res) => {
     const tasks = await Task.find(filter)
       .sort(sort)
       .skip(skip)
-      .limit(limit)
+      .limit(Number(limit))
       .populate("assignedTo", "name email")
       .populate("createdBy", "name email");
 
     const total = await Task.countDocuments(filter);
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / Number(limit));
 
     res.json({ success: true, tasks, totalPages });
   } catch (error) {
@@ -131,6 +170,20 @@ exports.updateTask = async (req, res) => {
     });
   }
 };
+
+exports.markTaskCompleted = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Task.findByIdAndUpdate(id, { status: "completed" });
+
+    res.json({ success: true, message: "Task marked as completed" });
+  } catch (error) {
+    console.error("Error marking task completed:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 exports.deleteTask = async (req, res) => {
   const task = await Task.findById(req.params.id);
   for (let doc of task.documents) {

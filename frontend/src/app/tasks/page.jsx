@@ -1,4 +1,5 @@
 "use client";
+import ViewTaskDialog from "@/components/admin/ViewTaskDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,16 +14,6 @@ import { showError } from "@/utils/toast";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { IoIosAddCircleOutline, IoMdArrowRoundBack } from "react-icons/io";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import Link from "next/link";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -58,7 +49,7 @@ function Page() {
   const [isLoading, setIsLoading] = useState(true);
   const [status, setStatus] = useState("");
   const [priority, setPriority] = useState("");
-  const [dueDateOrder, setDueDateOrder] = useState("acs");
+  const [dueDateOrder, setDueDateOrder] = useState("desc");
   const [open, setOpen] = useState(false);
   const [taskDeatils, setTaskDeatils] = useState(null);
 
@@ -124,7 +115,6 @@ function Page() {
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="in-progress">In-progress</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
             </Select>
@@ -149,6 +139,7 @@ function Page() {
             <div className="flex items-center px-4 py-2 border-b text-xs font-semibold bg-muted text-muted-foreground">
               <div className="w-8">#</div>
               <div className="flex-1 min-w-32">Title</div>
+              <div className="flex-1 min-w-32">Assign To</div>
               <div className="w-24">Status</div>
               <div className="w-24">Priority</div>
               <div
@@ -186,6 +177,22 @@ function Page() {
                       {index + 1}
                     </div>
                     <div className="truncate flex-1 min-w-32">{task.title}</div>
+                    <div className="min-w-32 flex-1 text-muted-foreground text-xs truncate capitalize">
+                      {(() => {
+                        const names = task.assignedTo.map(
+                          (u) => u.name || u.email
+                        );
+                        if (names.length === 0) return "---";
+                        const visible = names
+                          .slice(0, 3)
+                          .map((name) => name.split(" ")[0])
+                          .join(", ");
+                        const extraCount = names.length - 3;
+                        return extraCount > 0
+                          ? `${visible}, +${extraCount} more`
+                          : visible;
+                      })()}
+                    </div>
                     <div className="w-24 capitalize">
                       <Badge className={getStatusColor(task.status)}>
                         {task.status}
@@ -259,105 +266,3 @@ function Page() {
 
 export default Page;
 
-function ViewTaskDialog({ open, setOpen, task }) {
-  if (!task) return null;
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "in-progress":
-        return "bg-blue-100 text-blue-800";
-      case "completed":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "low":
-        return "bg-green-100 text-green-800";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800";
-      case "high":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={() => setOpen(false)}>
-      <DialogContent className="max-w-4xl [&>button]:hidden">
-        <DialogHeader>
-          <DialogTitle className="flex justify-between items-center">
-            <span>Task Details</span>
-            <Link href={`/tasks/${task._id}`}>
-              <Button size="sm" variant="outline">
-                Edit
-              </Button>
-            </Link>
-          </DialogTitle>
-        </DialogHeader>
-
-        <ScrollArea className="max-h-[70vh] pr-2 flex flex-col gap-4 text-sm">
-          <div>
-            <strong>Title:</strong> {task.title}
-          </div>
-          <div>
-            <strong>Description:</strong> {task.description}
-          </div>
-          <div>
-            <strong>Status:</strong>{" "}
-            <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
-          </div>
-          <div>
-            <strong>Priority:</strong>{" "}
-            <Badge className={getPriorityColor(task.priority)}>
-              {task.priority}
-            </Badge>
-          </div>
-          <div>
-            <strong>Due Date:</strong>{" "}
-            {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "-"}
-          </div>
-          <div>
-            <strong>Assigned To:</strong>{" "}
-            {task.assignedTo?.length > 0
-              ? task.assignedTo.map((u) => u.name || u.email).join(", ")
-              : "No users"}
-          </div>
-          <div>
-            <strong>Documents:</strong>
-            {task.documents?.length > 0 ? (
-              <ul className="list-decimal list-inside mt-1 space-y-1">
-                {task.documents.map((file, idx) => (
-                  <li key={idx}>
-                    <a
-                      href={file.secure_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline"
-                    >
-                      {idx + 1}. {file.original_filename}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground">No documents</p>
-            )}
-          </div>
-        </ScrollArea>
-
-        <DialogFooter>
-          <Button variant="secondary" onClick={() => setOpen(false)}>
-            Close
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}

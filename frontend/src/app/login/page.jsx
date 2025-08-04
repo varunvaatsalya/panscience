@@ -55,7 +55,7 @@ function Page() {
       result = await result.json();
       if (result.success) {
         if (result.user) setUser(result.user);
-        router.replace("/dashboard");
+        router.replace("/");
       } else {
         showError(result.message);
       }

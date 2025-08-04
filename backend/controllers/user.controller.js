@@ -4,9 +4,8 @@ const bcrypt = require("bcrypt");
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const { page = 1, query = "", taskCount = 0 } = req.query;
-    const limit = 10;
-    const skip = (Number(page) - 1) * limit;
+    const { page = 1, query = "", taskCount = "1", limit = 10 } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
 
     const searchFilter = {
       $or: [
@@ -18,10 +17,10 @@ exports.getAllUsers = async (req, res) => {
     let users = await User.find(searchFilter)
       .select("-password")
       .skip(skip)
-      .limit(limit);
+      .limit(Number(limit));
 
     const totalUsers = await User.countDocuments(searchFilter);
-    const totalPages = Math.ceil(totalUsers / limit);
+    const totalPages = Math.ceil(totalUsers / Number(limit));
 
     if (taskCount == "1") {
       const userIds = users.map((u) => u._id);
@@ -33,20 +32,32 @@ exports.getAllUsers = async (req, res) => {
         {
           $group: {
             _id: "$assignedTo",
-            count: { $sum: 1 },
+            total: { $sum: 1 },
+            pending: {
+              $sum: {
+                $cond: [{ $eq: ["$status", "pending"] }, 1, 0],
+              },
+            },
           },
         },
       ]);
 
       const taskMap = {};
       taskCounts.forEach((item) => {
-        taskMap[item._id.toString()] = item.count;
+        taskMap[item._id.toString()] = {
+          total: item.total,
+          pending: item.pending,
+        };
       });
 
-      users = users.map((user) => ({
-        ...user.toObject(),
-        taskCount: taskMap[user._id.toString()] || 0,
-      }));
+      users = users.map((user) => {
+        const count = taskMap[user._id.toString()] || { total: 0, pending: 0 };
+        return {
+          ...user.toObject(),
+          taskCount: count.total,
+          pendingCount: count.pending,
+        };
+      });
     }
 
     res.json({ success: true, users, totalPages });
@@ -102,7 +113,7 @@ exports.updateUser = async (req, res) => {
       user.password = hashed;
     }
     await user.save();
-    res.json({ success: true,user, message: "User updated successfully" });
+    res.json({ success: true, user, message: "User updated successfully" });
   } catch (error) {
     console.error("Update user failed:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
