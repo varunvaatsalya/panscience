@@ -101,6 +101,7 @@ exports.login = async (req, res) => {
       .cookie("sessionToken", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
+        sameSite: "None",
         maxAge: 2 * 24 * 60 * 60 * 1000,
       })
       .json({
@@ -130,6 +131,7 @@ exports.login = async (req, res) => {
     .cookie("sessionToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
       maxAge: 2 * 24 * 60 * 60 * 1000,
     })
     .json({
