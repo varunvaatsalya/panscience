@@ -100,7 +100,7 @@ exports.login = async (req, res) => {
     return res
       .cookie("sessionToken", token, {
         httpOnly: true,
-        secure: false,
+        secure: true,
         sameSite: "None",
         maxAge: 2 * 24 * 60 * 60 * 1000,
       })
@@ -130,7 +130,7 @@ exports.login = async (req, res) => {
   res
     .cookie("sessionToken", token, {
       httpOnly: true,
-      secure: false,
+      secure: true,
       sameSite: "None",
       maxAge: 2 * 24 * 60 * 60 * 1000,
     })
