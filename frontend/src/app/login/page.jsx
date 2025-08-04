@@ -59,11 +59,11 @@ function Page() {
 
       result = await result.json();
       if (result.success) {
-        Cookies.set("sessionToken", result.token, {
-          expires: 2,
-          secure: true,
-          sameSite: "Lax",
-        });
+        // Cookies.set("sessionToken", result.token, {
+        //   expires: 2,
+        //   secure: true,
+        //   sameSite: "Lax",
+        // });
         if (result.user) setUser(result.user);
         router.replace("/");
       } else {

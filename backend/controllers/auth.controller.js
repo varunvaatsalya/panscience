@@ -79,6 +79,13 @@ exports.login = async (req, res) => {
     });
   }
 
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: 2 * 24 * 60 * 60 * 1000,
+  };
+
   if (role === "admin") {
     if (
       email !== process.env.DEFAULT_ADMIN_EMAIL ||
@@ -97,7 +104,7 @@ exports.login = async (req, res) => {
 
     const token = generateToken(userResponse);
 
-    return res.json({
+    return res.cookie("sessionToken", token, options).json({
       token,
       user: userResponse,
       message: "Admin login successful",
@@ -121,8 +128,7 @@ exports.login = async (req, res) => {
 
   const token = generateToken(userResponse);
 
-  res.json({
-    token,
+  res.cookie("sessionToken", token, options).json({
     user: userResponse,
     message: "User login successful",
     success: true,
