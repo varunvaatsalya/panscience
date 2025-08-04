@@ -23,6 +23,7 @@ import {
 import { showError } from "@/utils/toast";
 import { useUserAuth } from "@/contexts/UserAuthContext";
 import Image from "next/image";
+import LOGO from "@/assets/logo.png";
 
 function Page() {
   const { setUser } = useUserAuth();
@@ -43,14 +44,17 @@ function Page() {
   const onSubmit = async (data) => {
     setSubmitting(true);
     try {
-      let result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-        credentials: "include",
-      });
+      let result = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+          credentials: "include",
+        }
+      );
 
       result = await result.json();
       if (result.success) {
@@ -73,7 +77,7 @@ function Page() {
           <CardHeader className="space-y-2 text-center">
             <div className="rounded-lg w-16 h-16 mx-auto mb-2">
               <Image
-                src="/logo.png"
+                src={LOGO}
                 width={400}
                 height={400}
                 alt="PanScience"
