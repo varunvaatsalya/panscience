@@ -80,11 +80,6 @@ function ViewTaskDialog({ open, setOpen, task, handleMarkCompleted }) {
         <DialogHeader>
           <DialogTitle className="flex justify-between items-center">
             <span>Task Details</span>
-            <Link href={`/tasks/${task._id}`}>
-              <Button size="sm" variant="outline">
-                Edit
-              </Button>
-            </Link>
             {task.status === "completed" ? (
               <div className="text-green-500 flex gap-1 text-nowrap text-sm items-center">
                 <FaRegCheckCircle />
@@ -92,6 +87,11 @@ function ViewTaskDialog({ open, setOpen, task, handleMarkCompleted }) {
               </div>
             ) : (
               <div className="flex gap-1 items-center">
+                <Link href={`/tasks/${task._id}`}>
+                  <Button size="sm" variant="outline">
+                    Edit
+                  </Button>
+                </Link>
                 <Button onClick={markTaskCompleted}>
                   {updating ? "Wait" : "Done"}
                 </Button>

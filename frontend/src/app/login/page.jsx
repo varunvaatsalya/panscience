@@ -82,7 +82,7 @@ function Page() {
     <div className="flex min-h-svh w-full items-center justify-center bg-muted p-6 md:p-10">
       <div className="w-full max-w-sm">
         <Card className="shadow-xl border border-border bg-background/70 backdrop-blur-md">
-          <CardHeader className="space-y-2 text-center">
+          <CardHeader className="text-center">
             <div className="rounded-lg w-16 h-16 mx-auto mb-2">
               <Image src={LOGO} width={400} height={400} alt="PanScience" />
             </div>
@@ -95,7 +95,7 @@ function Page() {
           </CardHeader>
 
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -153,6 +153,25 @@ function Page() {
                 {submitting ? "Logging In..." : "Log In"}
               </Button>
             </form>
+
+            <div className="mt-6 text-sm text-gray-600 bg-gray-100 p-3 rounded">
+              <p className="mb-1 font-medium">🔑 Default Admin Credentials:</p>
+              <p>
+                <strong>Email:</strong> <code>admin@panscience.xyz</code>
+              </p>
+              <p>
+                <strong>Password:</strong> <code>varungupta</code>
+              </p>
+              <p>
+                <strong>Role:</strong> <code>admin</code>
+              </p>
+            </div>
+
+            <p className="text-xs text-center text-gray-500 mt-4">
+              !This project is hosted on Render's free tier. The backend may
+              take <strong>20–30 seconds</strong> to respond on first request.
+              Please be patient.
+            </p>
           </CardContent>
         </Card>
       </div>

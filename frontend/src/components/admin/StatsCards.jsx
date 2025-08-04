@@ -51,12 +51,12 @@ export default function StatsCards() {
     {
       title: "Completed",
       icon: <CheckCircle className="text-green-600" />,
-      value: statsData?.pendingTasks || 0,
+      value: statsData?.completedTasks || 0,
     },
     {
       title: "Pending",
       icon: <Hourglass className="text-blue-600" />,
-      value: statsData?.completedTasks || 0,
+      value: statsData?.pendingTasks || 0,
     },
   ];
 

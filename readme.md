@@ -2,6 +2,15 @@
 
 A full-stack task management platform built with **Next.js**, **Node.js**, **MongoDB**, and **Cloudinary**. The system supports role-based access for admins and users, allowing task assignment, user management, task filtering, and document uploads.
 
+## 🌐 Live URLs
+
+- 🔗 **Frontend**: [https://panscience.vercel.app](https://panscience.vercel.app)
+- 🔗 **Backend**: [https://panscience.onrender.com](https://panscience.onrender.com)
+
+> ⚠️ **Note:** Since this app is hosted on [Render](https://render.com), the backend may take **40–50 seconds** to spin up if it's inactive. Please be patient on first load.
+
+---
+
 ## 🛠️ Tech Stack
 
 **Frontend:**
