@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showError } from "@/utils/toast";
+import Cookies from "js-cookie";
 import { Users, ClipboardList, CheckCircle, Hourglass } from "lucide-react";
 import { useEffect, useState } from "react";
 import { BiLoaderCircle } from "react-icons/bi";
@@ -9,6 +10,7 @@ import { BiLoaderCircle } from "react-icons/bi";
 export default function StatsCards() {
   const [statsData, setStatsData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const token = Cookies.get("sessionToken");
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
@@ -16,6 +18,9 @@ export default function StatsCards() {
         let res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/tasks/stats`,
           {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
             credentials: "include",
           }
         );

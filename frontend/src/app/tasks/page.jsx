@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { showError } from "@/utils/toast";
+import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { IoIosAddCircleOutline, IoMdArrowRoundBack } from "react-icons/io";
@@ -52,14 +53,18 @@ function Page() {
   const [dueDateOrder, setDueDateOrder] = useState("desc");
   const [open, setOpen] = useState(false);
   const [taskDeatils, setTaskDeatils] = useState(null);
-
+  
   useEffect(() => {
     async function fetchTasks() {
+      const token = Cookies.get("sessionToken");
       setIsLoading(true);
       try {
         let res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/tasks?page=${page}&status=${status}&priority=${priority}&dueDateOrder=${dueDateOrder}`,
           {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
             credentials: "include",
           }
         );
@@ -265,4 +270,3 @@ function Page() {
 }
 
 export default Page;
-

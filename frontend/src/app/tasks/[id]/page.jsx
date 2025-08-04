@@ -22,6 +22,7 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { showError, showSuccess } from "@/utils/toast";
 import { useParams, useRouter } from "next/navigation";
 import { useUserAuth } from "@/contexts/UserAuthContext";
+import Cookies from "js-cookie";
 const ClientSelect = dynamic(() => import("react-select"), { ssr: false });
 
 function Page() {
@@ -37,11 +38,15 @@ function Page() {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [creating, setCreating] = useState(false);
+  const token = Cookies.get("sessionToken");
 
   useEffect(() => {
     async function fetchUsers() {
       try {
         let res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           credentials: "include",
         });
         res = await res.json();
@@ -59,6 +64,9 @@ function Page() {
           let res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/api/tasks/${taskId}`,
             {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
               credentials: "include",
             }
           );
@@ -118,7 +126,10 @@ function Page() {
         }`,
         {
           method: taskId !== "new" ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(payload),
           credentials: "include",
         }
@@ -315,4 +326,3 @@ function CloudinaryUploader({ onUpload, disabled }) {
     </CldUploadWidget>
   );
 }
-

@@ -3,6 +3,7 @@ import UserForm from "@/components/admin/UserForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { showError } from "@/utils/toast";
+import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { IoIosAddCircleOutline, IoMdArrowRoundBack } from "react-icons/io";
@@ -16,7 +17,8 @@ function Page() {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [editUserDeatils, setEditUserDeatils] = useState(null);
-
+  const token = Cookies.get("sessionToken");
+  
   useEffect(() => {
     async function fetchUsers() {
       setIsLoading(true);
@@ -24,6 +26,9 @@ function Page() {
         let res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/users?page=${page}&query=${query}&taskCount=1`,
           {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
             credentials: "include",
           }
         );

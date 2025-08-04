@@ -15,12 +15,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import ViewTaskDialog from "./ViewTaskDialog";
 import { showError } from "@/utils/toast";
+import Cookies from "js-cookie";
 
 export default function RecentTasksTable() {
   const [tasks, setTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [taskDeatils, setTaskDeatils] = useState(null);
+  const token = Cookies.get("sessionToken");
 
   useEffect(() => {
     async function fetchTasks() {
@@ -29,6 +31,9 @@ export default function RecentTasksTable() {
         let res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/tasks?limit=4`,
           {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
             credentials: "include",
           }
         );

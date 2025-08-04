@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { showError, showSuccess } from "@/utils/toast";
+import Cookies from "js-cookie";
 
 function UserForm({ open, setOpen, data, setData, setUsers }) {
   const [user, setUser] = useState({
@@ -19,6 +20,7 @@ function UserForm({ open, setOpen, data, setData, setUsers }) {
     email: "",
     password: "",
   });
+  const token = Cookies.get("sessionToken");
 
   useEffect(() => {
     if (data) {
@@ -44,7 +46,10 @@ function UserForm({ open, setOpen, data, setData, setUsers }) {
         }`,
         {
           method: data ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(user),
           credentials: "include",
         }

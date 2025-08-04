@@ -12,6 +12,7 @@ import { Badge } from "../ui/badge";
 import { useState } from "react";
 import { showError, showSuccess } from "@/utils/toast";
 import { FaRegCheckCircle } from "react-icons/fa";
+import Cookies from "js-cookie";
 
 function ViewTaskDialog({ open, setOpen, task, handleMarkCompleted }) {
   if (!task) return null;
@@ -42,13 +43,16 @@ function ViewTaskDialog({ open, setOpen, task, handleMarkCompleted }) {
         return "bg-gray-100 text-gray-800";
     }
   };
-
+  const token = Cookies.get("sessionToken");
   const markTaskCompleted = async () => {
     setUpdating(true);
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/tasks/${task._id}/complete`,
         {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           method: "PATCH",
           credentials: "include",
         }
@@ -76,11 +80,11 @@ function ViewTaskDialog({ open, setOpen, task, handleMarkCompleted }) {
         <DialogHeader>
           <DialogTitle className="flex justify-between items-center">
             <span>Task Details</span>
-                <Link href={`/tasks/${task._id}`}>
-                  <Button size="sm" variant="outline">
-                    Edit
-                  </Button>
-                </Link>
+            <Link href={`/tasks/${task._id}`}>
+              <Button size="sm" variant="outline">
+                Edit
+              </Button>
+            </Link>
             {task.status === "completed" ? (
               <div className="text-green-500 flex gap-1 text-nowrap text-sm items-center">
                 <FaRegCheckCircle />

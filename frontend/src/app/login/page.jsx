@@ -45,12 +45,14 @@ function Page() {
   const onSubmit = async (data) => {
     setSubmitting(true);
     try {
+      const token = Cookies.get("sessionToken");
       let result = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(data),
           credentials: "include",

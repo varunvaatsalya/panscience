@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { showError } from "@/utils/toast";
+import Cookies from "js-cookie";
 
 export default function UsersTable() {
   const [users, setUsers] = useState([]);
@@ -33,7 +34,7 @@ export default function UsersTable() {
   //     taskCount: 3,
   //   },
   // ];
-
+  const token = Cookies.get("sessionToken");
   useEffect(() => {
     async function fetchUsers() {
       setIsLoading(true);
@@ -41,6 +42,9 @@ export default function UsersTable() {
         let res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/users?limit=4&taskCount=1`,
           {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
             credentials: "include",
           }
         );

@@ -1,22 +1,24 @@
 "use client";
 import { useUserAuth } from "@/contexts/UserAuthContext";
+import Spinner from "@/components/shared/Spinner";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 function Page() {
   const { user, loading } = useUserAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [loading, user, router]);
+
   if (loading) return <Spinner />;
-  if (loading) return <div>Loading...</div>;
   if (user?.role === "admin") return <AdminDashboard />;
   if (user?.role === "user") return <UserDashboard />;
-  return (
-    <div>
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <div>{user ? `${user.email} - ${user.role}` : "No User Found"}</div>
-      )}
-    </div>
-  );
+
+  return <></>;
 }
 
 export default Page;
@@ -24,7 +26,6 @@ export default Page;
 import StatsCards from "@/components/admin/StatsCards";
 import UsersTable from "@/components/admin/UsersTable";
 import RecentTasksTable from "@/components/admin/RecentTasksTable";
-import Spinner from "@/components/shared/Spinner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import UserForm from "@/components/admin/UserForm";
@@ -37,7 +38,6 @@ import {
   DialogClose,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
 import { Power } from "lucide-react";
 import Cookies from "js-cookie";
 
