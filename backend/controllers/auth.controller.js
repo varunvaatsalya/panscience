@@ -97,18 +97,12 @@ exports.login = async (req, res) => {
 
     const token = generateToken(userResponse);
 
-    return res
-      .cookie("sessionToken", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "None",
-        maxAge: 2 * 24 * 60 * 60 * 1000,
-      })
-      .json({
-        user: userResponse,
-        message: "Admin login successful",
-        success: true,
-      });
+    return res.json({
+      token,
+      user: userResponse,
+      message: "Admin login successful",
+      success: true,
+    });
   }
 
   const user = await User.findOne({ email });
@@ -127,16 +121,10 @@ exports.login = async (req, res) => {
 
   const token = generateToken(userResponse);
 
-  res
-    .cookie("sessionToken", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 2 * 24 * 60 * 60 * 1000,
-    })
-    .json({
-      user: userResponse,
-      message: "User login successful",
-      success: true,
-    });
+  res.json({
+    token,
+    user: userResponse,
+    message: "User login successful",
+    success: true,
+  });
 };

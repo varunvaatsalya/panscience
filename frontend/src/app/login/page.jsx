@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { BiLoaderCircle } from "react-icons/bi";
 import { Button } from "@/components/ui/button";
+import Cookies from "js-cookie";
 import {
   Card,
   CardContent,
@@ -58,6 +59,11 @@ function Page() {
 
       result = await result.json();
       if (result.success) {
+        Cookies.set("sessionToken", result.token, {
+          expires: 2,
+          secure: true,
+          sameSite: "Lax",
+        });
         if (result.user) setUser(result.user);
         router.replace("/");
       } else {
@@ -76,12 +82,7 @@ function Page() {
         <Card className="shadow-xl border border-border bg-background/70 backdrop-blur-md">
           <CardHeader className="space-y-2 text-center">
             <div className="rounded-lg w-16 h-16 mx-auto mb-2">
-              <Image
-                src={LOGO}
-                width={400}
-                height={400}
-                alt="PanScience"
-              />
+              <Image src={LOGO} width={400} height={400} alt="PanScience" />
             </div>
             <CardTitle className="text-xl font-semibold">
               PanScience Task Manager
