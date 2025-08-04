@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { Power } from "lucide-react";
+import Cookies from "js-cookie";
 
 function AdminDashboard() {
   return (
@@ -68,9 +69,11 @@ function DashboardHeader() {
   const handleLogout = () => {
     setConfimOpen(false);
     router.push("/login");
+    Cookies.remove("sessionToken", {
+      secure: true,
+      sameSite: "None",
+    });
     setUser(null);
-    document.cookie =
-      "sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   };
 
   return (
