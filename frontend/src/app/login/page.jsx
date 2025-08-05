@@ -165,6 +165,16 @@ function Page() {
               <p>
                 <strong>Role:</strong> <code>admin</code>
               </p>
+              <Button
+                variant="link"
+                className="px-0"
+                onClick={() => {
+                  setValue("email", "admin@panscience.xyz");
+                  setValue("password", "varungupta");
+                }}
+              >
+                Click Here to auto-fill
+              </Button>
             </div>
 
             <p className="text-xs text-center text-gray-500 mt-4">
